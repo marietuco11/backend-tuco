@@ -32,11 +32,11 @@ const eventSchema = new mongoose.Schema(
     },
     startDate: {
       type: Date,
-      required: true
+      default: null, // Algunos eventos no tienen fecha
     },
     endDate: {
       type: Date,
-      required: true
+      default: null, // Algunos eventos no tienen fecha
     },
     locationName: {
       type: String,

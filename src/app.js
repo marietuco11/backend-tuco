@@ -8,6 +8,9 @@ const authRoutes = require('./routes/auth.routes');
 
 const notFound = require("./middlewares/notFound");
 const errorHandler = require("./middlewares/errorHandler");
+const zaragozaRoutes = require("./routes/zaragoza.routes");
+const { startEventSync } = require("./jobs/syncEvents.job");
+
 
 const app = express();
 
@@ -23,9 +26,13 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/events", eventRoutes);
+app.use("/api/zaragoza", zaragozaRoutes);
 app.use("/api/auth", authRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
 
 module.exports = app;
+
+
+startEventSync();
