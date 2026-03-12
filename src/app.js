@@ -7,8 +7,6 @@ const eventRoutes = require("./routes/event.routes");
 const notFound = require("./middlewares/notFound");
 const errorHandler = require("./middlewares/errorHandler");
 const zaragozaRoutes = require("./routes/zaragoza.routes");
-const { startEventSync } = require("./jobs/syncEvents.job");
-
 
 const app = express();
 
@@ -30,6 +28,3 @@ app.use(notFound);
 app.use(errorHandler);
 
 module.exports = app;
-
-
-startEventSync();
