@@ -87,6 +87,130 @@ async function getEvents(req, res) {
   }
 }
 
+async function getEventDetail(req, res) {
+  try {
+    const { id } = req.params;
+    const event = await Event.findById(id).select(
+      'title description category startDate endDate locationName address imageUrl status enrolled isFree'
+    );
+
+    if (!event) {
+      return res.status(404).json({ message: 'Evento no encontrado' });
+    }
+
+    return res.status(200).json({
+      event: {
+        id: event._id,
+        title: event.title,
+        description: event.description,
+        category: event.category,
+        startDate: event.startDate,
+        endDate: event.endDate,
+        location: event.locationName,
+        address: event.address,
+        imageUrl: event.imageUrl,
+        status: event.status,
+        enrolled: event.enrolled || 0,
+        isFree: event.isFree
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error al obtener detalles del evento' });
+  }
+}
+
+async function createEvent(req, res) {
+  try {
+    const { title, description, category, startDate, endDate, location, status, isFree } = req.body;
+
+    if (!title || !description || !category || !location) {
+      return res.status(400).json({ message: 'Faltan campos requeridos' });
+    }
+
+    const event = new Event({
+      externalId: `admin-${Date.now()}`,
+      title,
+      description,
+      category,
+      startDate: startDate ? new Date(startDate) : null,
+      endDate: endDate ? new Date(endDate) : null,
+      locationName: location,
+      status: status || 'active',
+      isFree: isFree !== undefined ? isFree : true
+    });
+
+    await event.save();
+
+    return res.status(201).json({
+      message: 'Evento creado exitosamente',
+      event: {
+        id: event._id,
+        title: event.title,
+        category: event.category,
+        status: event.status
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error al crear evento' });
+  }
+}
+
+async function updateEvent(req, res) {
+  try {
+    const { id } = req.params;
+    const { title, description, category, startDate, endDate, location, status, isFree } = req.body;
+
+    // Validar que el evento existe
+    const event = await Event.findOne({ _id: id });
+    if (!event) {
+      return res.status(404).json({ message: 'Evento no encontrado' });
+    }
+
+    // Actualizar solo los campos proporcionados
+    if (title && title.trim()) event.title = title.trim();
+    if (description && description.trim()) event.description = description.trim();
+    if (category && category.trim()) event.category = category.trim();
+    if (startDate && startDate.trim()) event.startDate = new Date(startDate);
+    if (endDate && endDate.trim()) event.endDate = new Date(endDate);
+    if (location && location.trim()) event.locationName = location.trim();
+    if (status && status.trim()) event.status = status.trim();
+    if (isFree !== undefined) event.isFree = isFree;
+
+    // Guardar cambios
+    await event.save();
+
+    return res.status(200).json({
+      message: 'Evento actualizado exitosamente',
+      event: {
+        id: event._id,
+        title: event.title,
+        category: event.category,
+        status: event.status
+      }
+    });
+  } catch (error) {
+    console.error('Error al actualizar evento:', error);
+    return res.status(500).json({ message: 'Error al actualizar evento' });
+  }
+}
+
+async function deleteEvent(req, res) {
+  try {
+    const { id } = req.params;
+
+    const event = await Event.findById(id);
+    if (!event) {
+      return res.status(404).json({ message: 'Evento no encontrado' });
+    }
+
+    await Event.findByIdAndDelete(id);
+
+    return res.status(200).json({ message: 'Evento eliminado exitosamente' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error al eliminar evento' });
+  }
+}
+
 async function getReportsSummary(req, res) {
   try {
     const [totalReports, userReports, contentReports, eventReports] = await Promise.all([
@@ -599,6 +723,10 @@ module.exports = {
   getDashboard,
   getUsers,
   getEvents,
+  getEventDetail,
+  createEvent,
+  updateEvent,
+  deleteEvent,
   getReportsSummary,
   getReports,
   getReportDetail,

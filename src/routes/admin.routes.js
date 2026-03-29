@@ -7,6 +7,10 @@ const {
   getDashboard, 
   getUsers, 
   getEvents, 
+  getEventDetail,
+  createEvent,
+  updateEvent,
+  deleteEvent,
   getReportsSummary, 
   getReports,
   getReportDetail,
@@ -205,6 +209,150 @@ router.delete('/users/:id', requireAuth, requireAdmin, deleteUser);
  *         description: No autorizado
  */
 router.get('/events', requireAuth, requireAdmin, getEvents);
+
+/**
+ * @swagger
+ * /api/admin/events/{id}:
+ *   get:
+ *     summary: Obtener detalles de un evento
+ *     tags: [Administración]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Detalles del evento
+ *       404:
+ *         description: Evento no encontrado
+ *       401:
+ *         description: No autenticado
+ *       403:
+ *         description: No autorizado
+ */
+router.get('/events/:id', requireAuth, requireAdmin, getEventDetail);
+
+/**
+ * @swagger
+ * /api/admin/events:
+ *   post:
+ *     summary: Crear un nuevo evento
+ *     tags: [Administración]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               category:
+ *                 type: string
+ *               startDate:
+ *                 type: string
+ *               endDate:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *               isFree:
+ *                 type: boolean
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Evento creado exitosamente
+ *       400:
+ *         description: Faltan campos requeridos
+ *       401:
+ *         description: No autenticado
+ *       403:
+ *         description: No autorizado
+ */
+router.post('/events', requireAuth, requireAdmin, createEvent);
+
+/**
+ * @swagger
+ * /api/admin/events/{id}:
+ *   put:
+ *     summary: Actualizar un evento
+ *     tags: [Administración]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               category:
+ *                 type: string
+ *               startDate:
+ *                 type: string
+ *               endDate:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *               isFree:
+ *                 type: boolean
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Evento actualizado exitosamente
+ *       404:
+ *         description: Evento no encontrado
+ *       401:
+ *         description: No autenticado
+ *       403:
+ *         description: No autorizado
+ */
+router.put('/events/:id', requireAuth, requireAdmin, updateEvent);
+
+/**
+ * @swagger
+ * /api/admin/events/{id}:
+ *   delete:
+ *     summary: Eliminar un evento
+ *     tags: [Administración]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Evento eliminado exitosamente
+ *       404:
+ *         description: Evento no encontrado
+ *       401:
+ *         description: No autenticado
+ *       403:
+ *         description: No autorizado
+ */
+router.delete('/events/:id', requireAuth, requireAdmin, deleteEvent);
 
 /**
  * @swagger
