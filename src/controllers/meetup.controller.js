@@ -220,10 +220,39 @@ async function cancelMeetup(req, res) {
   }
 }
 
+async function getPendingMeetupInvitationsCount(req, res) {
+  try {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'No autenticado' });
+    }
+
+    const pendingInvitationsCount = await Meetup.countDocuments({
+      status: 'active',
+      participants: {
+        $elemMatch: {
+          user: userId,
+          response: 'pending'
+        }
+      }
+    });
+
+    return res.status(200).json({
+      pendingInvitationsCount,
+      hasPendingMeetupInvitations: pendingInvitationsCount > 0
+    });
+  } catch (error) {
+    console.error('GET PENDING MEETUP INVITATIONS COUNT ERROR:', error);
+    return res.status(500).json({ message: 'Error al obtener invitaciones pendientes de quedadas' });
+  }
+}
+
 module.exports = {
   createMeetup,
   getOrganizedMeetups,
   getInvitedMeetups,
   respondToMeetup,
-  cancelMeetup
+  cancelMeetup,
+  getPendingMeetupInvitationsCount
 };

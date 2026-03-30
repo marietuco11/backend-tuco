@@ -9,7 +9,8 @@ const {
   getOrganizedMeetups,
   getInvitedMeetups,
   respondToMeetup,
-  cancelMeetup
+  cancelMeetup,
+  getPendingMeetupInvitationsCount
 } = require('../controllers/meetup.controller');
 
 const {
@@ -72,5 +73,14 @@ router.put('/:meetupId/respond', respondMeetupValidator, validateRequest, respon
  *     tags: [Quedadas]
  */
 router.put('/:meetupId/cancel', meetupIdValidator, validateRequest, cancelMeetup);
+
+/**
+ * @swagger
+ * /api/meetups/pending-invitations-count:
+ *   get:
+ *     summary: Obtener el conteo de invitaciones pendientes a quedadas
+ *     tags: [Quedadas]
+ */
+router.get('/pending-invitations-count', getPendingMeetupInvitationsCount);
 
 module.exports = router;
