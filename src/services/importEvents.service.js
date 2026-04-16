@@ -32,7 +32,13 @@ async function importEvents() {
 
         await Event.updateOne(
           { externalId: mapped.externalId },
-          { $set: mapped }
+          {
+            $set: {
+              ...mapped,
+              status: "active",
+              expiredAt: null
+            }
+          }
         );
 
         updated++;

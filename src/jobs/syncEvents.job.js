@@ -2,6 +2,7 @@ const cron = require("node-cron");
 
 const importEvents = require("../services/importEvents.service");
 const updateExpiredEvents = require("../services/eventStatus.service");
+const deleteOldEvents = require("../services/deleteOldEvents.service");
 
 async function runSync() {
 
@@ -11,10 +12,13 @@ async function runSync() {
 
   const expiredCount = await updateExpiredEvents();
 
+  const deletedCount = await deleteOldEvents();
+
   console.log("Sync finished", {
     imported: importResult.imported,
     updated: importResult.updated,
-    expiredUpdated: expiredCount
+    expiredUpdated: expiredCount,
+    deleted: deletedCount
   });
 
 }

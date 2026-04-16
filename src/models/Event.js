@@ -75,6 +75,10 @@ const eventSchema = new mongoose.Schema(
       type: Boolean,
       default: true
     },
+    expiredAt: {
+      type: Date,
+      default: null
+    },
     syncedAt: {
       type: Date,
       default: Date.now
