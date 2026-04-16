@@ -10,12 +10,10 @@ async function getSummary(req, res) {
       status: "active"
     };
 
-    // Filtro por categoría
     if (category) {
       query.category = category;
     }
 
-    // Filtro por fecha
     if (date) {
       const start = new Date(date);
       const end = new Date(date);
@@ -24,7 +22,6 @@ async function getSummary(req, res) {
       query.startDate = { $gte: start, $lte: end };
     }
 
-    // Obtener eventos (máx 8)
     const events = await Event.find(query)
       .sort({ startDate: 1 })
       .limit(8);
@@ -43,6 +40,4 @@ async function getSummary(req, res) {
 
 }
 
-module.exports = {
-  getSummary
-};
+module.exports = { getSummary };
