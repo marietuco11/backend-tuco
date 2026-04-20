@@ -10,7 +10,10 @@ async function updateExpiredEvents() {
       status: "active"
     },
     {
-      $set: { status: "expired" }
+      $set: {
+        status: "expired",
+        expiredAt: now
+      }
     }
   );
 

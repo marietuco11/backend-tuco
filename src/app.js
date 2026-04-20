@@ -16,6 +16,7 @@ const notFound = require("./middlewares/notFound");
 const errorHandler = require("./middlewares/errorHandler");
 const zaragozaRoutes = require("./routes/zaragoza.routes");
 const recommendRoutes = require('./routes/recommend.routes');
+const aiRoutes = require("./routes/ai.routes");
 
 // Swagger
 const swaggerUi = require('swagger-ui-express');
@@ -72,6 +73,7 @@ app.use("/api/stats", statsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use("/api/recommend", recommendRoutes);
 app.use("/api/meetups", meetupRoutes);
+app.use("/api/ai", aiRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
