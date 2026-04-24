@@ -12,7 +12,8 @@ const {
   requestPasswordReset,
   resetPassword,
   getHistory,
-  getAttending
+  getAttending,
+  getRecommendations
 } = require("../controllers/auth.controller");
 
 const cookieParser = require('cookie-parser');
@@ -333,5 +334,8 @@ router.get("/history", requireAuth, getHistory);
  
 // Eventos futuros a los que el usuario va a asistir
 router.get("/attending", requireAuth, getAttending);
+
+// Recomendaciones personalizadas basadas en los eventos del usuario
+router.get("/recommendations", requireAuth, getRecommendations);
 
 module.exports = router;

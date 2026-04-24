@@ -573,6 +573,92 @@ async function getAttending(req, res) {
   }
 }
 
+
+// Endpoint para obtener recomendaciones basadas en las categorías
+// de los eventos a los que el usuario asiste o ha asistido
+async function getRecommendations(req, res) {
+  try {
+    const userId = req.user?.sub;
+    if (!userId) return res.status(401).json({ message: 'No autenticado' });
+
+    const limit = parseInt(req.query.limit) || 10;
+
+    // 1. Obtener el usuario con sus eventos populados
+    const user = await User.findById(userId).populate({
+      path: 'attendedEvents',
+      model: 'Event',
+      options: { strictPopulate: false }
+    });
+
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+
+    const myEvents = user.attendedEvents ?? [];
+    if (myEvents.length === 0) {
+      return res.status(200).json({ success: true, data: [], message: 'Sin eventos para basar recomendaciones' });
+    }
+
+    // 2. Extraer categorías únicas priorizando las más recientes
+    // (attendedEvents está ordenado por fecha de inserción, las últimas son las más recientes)
+    const allCategories = [...new Set(
+      [...myEvents].reverse().map(e => e.category).filter(Boolean)
+    )];
+
+    // Con límite 10, máximo 5 categorías para que salgan al menos 2 por categoría
+    const MAX_CATS = Math.min(allCategories.length, Math.floor(limit / 2));
+    const categories = allCategories.slice(0, MAX_CATS);
+
+    if (categories.length === 0) {
+      return res.status(200).json({ success: true, data: [] });
+    }
+
+    // 3. IDs de eventos que ya tiene para excluirlos
+    const myIds = myEvents.map(e => e._id);
+    const now   = new Date();
+
+    // 4. Buscar eventos por categoría de forma equilibrada
+    // Si tiene 2 categorías → 5 de cada una, si tiene 3 → 3-4 de cada una
+    const Event = require('../models/Event');
+    // Repartir eventos equitativamente entre categorías
+    const perCategory = Math.ceil(limit / categories.length);
+
+    const byCategory = await Promise.all(
+      categories.map(cat =>
+        Event.find({
+          status:   'active',
+          category: cat,
+          _id:      { $nin: myIds },
+          $or: [{ startDate: { $gte: now } }, { startDate: null }]
+        })
+          .sort({ startDate: 1 })
+          .limit(perCategory)
+      )
+    );
+
+    // Mezclar intercalando: 1 de Deporte, 1 de Música, 1 de Deporte...
+    // así la lista no sale toda de la misma categoría
+    const interleaved = [];
+    const maxLen = Math.max(...byCategory.map(arr => arr.length));
+    for (let i = 0; i < maxLen; i++) {
+      for (const arr of byCategory) {
+        if (arr[i]) interleaved.push(arr[i]);
+      }
+    }
+
+    const result = interleaved.slice(0, limit);
+
+    return res.status(200).json({
+      success: true,
+      count: result.length,
+      data:  result,
+      categories
+    });
+
+  } catch (error) {
+    console.error('GET RECOMMENDATIONS ERROR:', error);
+    return res.status(500).json({ message: 'Error al obtener recomendaciones' });
+  }
+}
+
 module.exports = {
   register,
   login,
@@ -584,5 +670,6 @@ module.exports = {
   requestPasswordReset,
   resetPassword,
   getHistory,
-  getAttending
+  getAttending,
+  getRecommendations
 };
