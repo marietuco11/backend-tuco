@@ -161,11 +161,73 @@ const toggleAttendance = async (req, res, next) => {
     next(error);
   }
 };
+
+
+const getEventSections = async (req, res, next) => {
+  try {
+    const now = new Date();
+
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
+
+    const endOfWeek = new Date();
+    endOfWeek.setDate(now.getDate() + 7);
+
+    const baseFilter = {
+      status: "active",
+      startDate: { $ne: null }
+    };
+
+    const [featured, today, week, recent] = await Promise.all([
+
+      // TEMPORAL → destacados = próximos
+      Event.find(baseFilter)
+        .sort({ startDate: 1 })
+        .limit(10),
+
+      Event.find({
+        ...baseFilter,
+        startDate: { $gte: startOfToday, $lte: endOfToday }
+      })
+        .sort({ startDate: 1 })
+        .limit(10),
+
+      Event.find({
+        ...baseFilter,
+        startDate: { $gte: now, $lte: endOfWeek }
+      })
+        .sort({ startDate: 1 })
+        .limit(10),
+
+      Event.find(baseFilter)
+        .sort({ syncedAt: -1 })
+        .limit(10)
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        featured,
+        today,
+        week,
+        recent
+      }
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getAllEvents,
   getEventById,
   createEvent,
   updateEvent,
   deleteEvent,
-  toggleAttendance
+  toggleAttendance,
+  getEventSections
 };

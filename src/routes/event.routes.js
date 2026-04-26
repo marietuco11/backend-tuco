@@ -7,7 +7,8 @@ const {
   createEvent,
   updateEvent,
   deleteEvent,
-  toggleAttendance
+  toggleAttendance,
+  getEventSections
 } = require("../controllers/event.controller");
 
 const validateRequest = require("../middlewares/validateRequest");
@@ -42,6 +43,45 @@ const {
  *                 $ref: '#/components/schemas/Event'
  */
 router.get("/", getAllEvents);
+
+/**
+ * @swagger
+ * /api/events/sections:
+ *   get:
+ *     summary: Obtener secciones de eventos (destacados, hoy, semana, recientes)
+ *     tags: [Eventos]
+ *     responses:
+ *       200:
+ *         description: Secciones de eventos para la home
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     featured:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Event'
+ *                     today:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Event'
+ *                     week:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Event'
+ *                     recent:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Event'
+ */
+router.get("/sections", getEventSections);
+
 
 /**
  * @swagger
@@ -146,7 +186,6 @@ router.put("/:id", updateEventValidator, validateRequest, updateEvent);
  */
 router.delete("/:id", eventIdValidator, validateRequest, deleteEvent);
 
-router.post("/:id/attend", requireAuth, toggleAttendance);
 
 /**
  * @swagger
@@ -209,4 +248,6 @@ router.post("/:id/attend", requireAuth, toggleAttendance);
  *         date: "2024-05-01T20:00:00Z"
  *         location: "Sala Multiusos, Zaragoza"
  */
+router.post("/:id/attend", requireAuth, toggleAttendance);
+
 module.exports = router;
