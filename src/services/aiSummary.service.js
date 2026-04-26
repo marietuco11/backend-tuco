@@ -1,41 +1,66 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
 async function generateSummary(events) {
 
   if (!events || events.length === 0) {
-    return "No hay eventos disponibles para este criterio.";
+    return {
+      summary: "No hay eventos para este criterio.",
+      highlights: []
+    };
   }
 
-  const simplified = events.map(e => ({
+  const simplified = events.slice(0, 20).map(e => ({
+    id: e._id,
     titulo: e.title,
     categoria: e.category,
     fecha: e.startDate
   }));
 
   const prompt = `
-Eres un asistente que resume eventos en Zaragoza.
+Eres un sistema que analiza eventos en Zaragoza.
 
-A partir de esta lista de eventos, genera un resumen neutro, informativo y breve (2-3 líneas).
-No recomiendes, solo describe qué tipo de eventos predominan.
+1. Genera un resumen general (5-10 líneas)
+- Describe tendencias
+- NO nombres eventos concretos
+- NO recomiendes
 
-Eventos:
+2. Devuelve JSON EXACTO:
+
+{
+  "summary": "texto",
+  "highlights": [
+    { "text": "nombre corto", "eventId": "id" }
+  ]
+}
+
+EVENTOS:
 ${JSON.stringify(simplified, null, 2)}
-
-Reglas:
-- Máximo 3 líneas
-- No inventes eventos
-- No menciones todos uno a uno
-- No hagas recomendaciones
 `;
 
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   const result = await model.generateContent(prompt);
-  const text = result.response.text().trim();
+  let text = result.response.text().trim();
 
-  return text;
+  // limpiar markdown
+  text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+
+  try {
+    const parsed = JSON.parse(text);
+
+    return {
+      summary: parsed.summary || "",
+      highlights: parsed.highlights || []
+    };
+
+  } catch (err) {
+    console.error("IA mal formateada:", text);
+
+    // fallback seguro
+    return {
+      summary: text,
+      highlights: events.slice(0, 3).map(e => ({
+        text: e.title,
+        eventId: e._id
+      }))
+    };
+  }
 }
-
-module.exports = generateSummary;

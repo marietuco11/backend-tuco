@@ -48,10 +48,26 @@ const swaggerSpec = swaggerJSDoc(options);
 const app = express();
 
 app.use(helmet());
+
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://127.0.0.1:4200'
+];
+
 app.use(cors({
-  origin: 'http://localhost:4200', // Cambia si tu frontend está en otro puerto/origen
+  origin: function (origin, callback) {
+    // Permitir requests sin origin (Postman, curl)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('No permitido por CORS'));
+    }
+  },
   credentials: true
 }));
+
 app.use(morgan("dev"));
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
