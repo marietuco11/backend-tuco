@@ -15,6 +15,58 @@ const categoryMap = {
   naturaleza: ["Aire Libre y Excursiones", "Medio Ambiente y Naturaleza"],
 };
 
+
+/**
+ * @swagger
+ * tags:
+ *   name: Recomendaciones
+ *   description: Recomendaciones personalizadas con IA (SpAlk)
+ */
+
+/**
+ * @swagger
+ * /api/recommend:
+ *   post:
+ *     summary: Obtener recomendaciones de eventos personalizadas
+ *     tags: [Recomendaciones]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - companion
+ *               - vibe
+ *             properties:
+ *               companion:
+ *                 type: string
+ *                 enum: [solo, pareja, grupo, familia]
+ *                 example: "solo"
+ *               vibe:
+ *                 type: string
+ *                 enum: [tranquilo, emocionante, exterior, interior, gastronomico, cultural]
+ *                 example: "cultural"
+ *     responses:
+ *       200:
+ *         description: Eventos recomendados
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 events:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 category:
+ *                   type: string
+ *                   example: "cultura"
+ *       400:
+ *         description: Faltan parámetros companion o vibe
+ *       500:
+ *         description: Error interno
+ */
 router.post("/", async (req, res) => {
   try {
     const { companion, vibe } = req.body;
