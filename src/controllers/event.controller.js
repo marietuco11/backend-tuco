@@ -186,25 +186,25 @@ const getEventSections = async (req, res, next) => {
       // TEMPORAL → destacados = próximos
       Event.find(baseFilter)
         .sort({ startDate: 1 })
-        .limit(10),
+        .limit(12),
 
       Event.find({
         ...baseFilter,
         startDate: { $gte: startOfToday, $lte: endOfToday }
       })
         .sort({ startDate: 1 })
-        .limit(10),
+        .limit(12),
 
       Event.find({
         ...baseFilter,
         startDate: { $gte: now, $lte: endOfWeek }
       })
         .sort({ startDate: 1 })
-        .limit(10),
+        .limit(12),
 
       Event.find(baseFilter)
         .sort({ syncedAt: -1 })
-        .limit(10)
+        .limit(12)
     ]);
 
     res.status(200).json({
