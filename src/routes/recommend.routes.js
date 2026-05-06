@@ -120,7 +120,7 @@ Reglas:
 - Sin texto adicional
 `;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
     const result = await model.generateContent(prompt);
     const aiCategory = result.response.text().trim().toLowerCase().replace(/[^a-záéíóúñ]/gi, '');
 
